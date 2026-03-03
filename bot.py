@@ -78,12 +78,12 @@ async def main():
     bot_kienphat = BodyguardBot(vip_id=1047924907805253692, music_file="anhkiemphat.mp3")
     bot_huyly = BodyguardBot(vip_id=916156563931168808, music_file="emhuylys.mp3")
     bot_giabao = BodyguardBot(vip_id=508480474381942794, music_file="anhgiabao.mp3")
+    
     await asyncio.gather(
         bot_duyanh.start(os.environ.get("BOT_DUYANH", "")),
         bot_kienphat.start(os.environ.get("BOT_KIENPHAT", "")),
         bot_huyly.start(os.environ.get("BOT_HUY", "")),
-        bot_gibao.start(os.environ.get("BOT_GIABAO", ""))
-    )
+        bot_giabao.start(os.environ.get("BOT_GIABAO", ""))
     )
 
 # Khởi động Web Server ảo
@@ -95,4 +95,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Đã tắt toàn bộ hệ thống Bot.")
+
 
