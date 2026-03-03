@@ -21,6 +21,7 @@ USER_MUSIC = {
     1047924907805253692: "anhkiemphat.mp3",   
     916156563931168808: "emhuylys.mp3",  
     508480474381942794: "nhacgiabao.mp3",  
+    469547032688984075: "Anh DUy Anh (mp3cut.net).mp3",
 }
 # -----------------------------------
 
@@ -89,3 +90,4 @@ if TOKEN:
     bot.run(TOKEN)
 else:
     print("LỖI: Chưa cấu hình DISCORD_TOKEN trên Render!")
+
