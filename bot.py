@@ -1,93 +1,97 @@
 import discord
-from discord.ext import commands
 import asyncio
 import os
 from keep_alive import keep_alive
 
+# Bật Intents (Chỉ cần Voice States là đủ để bot vào phòng)
 intents = discord.Intents.default()
-intents.message_content = True
 intents.voice_states = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+FFMPEG_OPTIONS = {'options': '-vn'}
 
-TOKEN = os.environ.get("DISCORD_TOKEN")
+# ==========================================
+# KHỞI TẠO CLASS "VỆ SĨ BOT"
+# ==========================================
+class BodyguardBot(discord.Client):
+    def __init__(self, vip_id, music_file):
+        super().__init__(intents=intents)
+        self.vip_id = vip_id          # ID của người mà bot này phục vụ
+        self.music_file = music_file  # Bài nhạc riêng của người đó
 
-FFMPEG_OPTIONS = {
-    'options': '-vn',
-}
+    async def on_ready(self):
+        print(f"[ONLINE] Vệ sĩ {self.user} đã sẵn sàng phục vụ VIP ID: {self.vip_id}")
 
-# --- BỘ TỪ ĐIỂN NHẠC VIP ---
-USER_MUSIC = {
-    1047924907805253692: "anhkiemphat.mp3",   
-    916156563931168808: "emhuylys.mp3",  
-    508480474381942794: "nhacgiabao.mp3",  
-    469547032688984075: "Anh DUy Anh (mp3cut.net).mp3",
-}
-# -----------------------------------
+    async def on_voice_state_update(self, member, before, after):
+        # Bỏ qua nếu là chính nó (bot)
+        if member == self.user:
+            return
 
-@bot.event
-async def on_ready():
-    print(f'--- DJ {bot.user} đã sẵn sàng phục vụ dân chơi VIP! ---')
-
-@bot.event
-async def on_voice_state_update(member, before, after):
-    if member == bot.user:
-        return
-
-    if after.channel is not None and after.channel.name == "LOBBY":
-        if before.channel is None or before.channel.name != "LOBBY":
-            
-            # Log ra Terminal để bạn biết ID thật của người vừa vào
-            print(f"[LOG] {member.name} (ID: {member.id}) vừa tham gia LOBBY.")
-
-            # --- BỘ LỌC VIP ---
-            if member.id not in USER_MUSIC:
-                print(f"[SKIP] {member.name} không có trong danh sách VIP. Lơ luôn!")
-                return
-            # ------------------
-
-            voice_client = discord.utils.get(bot.voice_clients, guild=after.channel.guild)
-
-            if voice_client and voice_client.is_connected():
-                if voice_client.is_playing():
-                    return
-            else:
-                try:
-                    voice_client = await after.channel.connect()
-                except Exception as e:
-                    print(f"Lỗi kết nối Voice: {e}")
-                    return
-
-            try:
-                # Trích xuất đúng tên file nhạc của người đó
-                selected_music = USER_MUSIC[member.id]
+        # Chỉ kích hoạt khi có người vào phòng LOBBY
+        if after.channel is not None and after.channel.name == "LOBBY":
+            if before.channel is None or before.channel.name != "LOBBY":
                 
-                raw_source = discord.FFmpegPCMAudio(selected_music, executable="ffmpeg", **FFMPEG_OPTIONS)
-                vol_source = discord.PCMVolumeTransformer(raw_source, volume=0.74)
+                # --- KIỂM TRA ĐÚNG CHỦ NHÂN MỚI CHẠY ---
+                if member.id != self.vip_id:
+                    return # Không phải chủ nhân -> Lơ đẹp!
+                
+                print(f"[VIP IN] Chủ nhân {member.name} đã tới. {self.user} đang bật nhạc '{self.music_file}'...")
 
-                def after_playing(error):
-                    if error:
-                        print(f"Lỗi FFmpeg: {error}")
-                    coro = voice_client.disconnect()
-                    fut = asyncio.run_coroutine_threadsafe(coro, bot.loop)
+                # Kiểm tra kết nối voice của con bot hiện tại
+                voice_client = discord.utils.get(self.voice_clients, guild=after.channel.guild)
+
+                if voice_client and voice_client.is_connected():
+                    if voice_client.is_playing():
+                        return
+                else:
                     try:
-                        fut.result()
-                    except:
-                        pass
+                        voice_client = await after.channel.connect()
+                    except Exception as e:
+                        print(f"Lỗi kết nối Voice: {e}")
+                        return
 
-                if not voice_client.is_playing():
-                    voice_client.play(vol_source, after=after_playing)
-                    print(f"[PLAYING] Đang phát file '{selected_music}' cho dân chơi {member.name}")
+                try:
+                    # Phát bài nhạc được giao cho con bot này
+                    raw_source = discord.FFmpegPCMAudio(self.music_file, executable="ffmpeg", **FFMPEG_OPTIONS)
+                    vol_source = discord.PCMVolumeTransformer(raw_source, volume=0.74)
 
-            except Exception as e:
-                print(f"Lỗi hệ thống phát nhạc: {e}")
-                if voice_client:
-                    await voice_client.disconnect()
+                    def after_playing(error):
+                        if error:
+                            print(f"Lỗi FFmpeg: {error}")
+                        coro = voice_client.disconnect()
+                        fut = asyncio.run_coroutine_threadsafe(coro, self.loop)
+                        try:
+                            fut.result()
+                        except:
+                            pass
 
+                    if not voice_client.is_playing():
+                        voice_client.play(vol_source, after=after_playing)
+                        print(f"[PLAYING] {self.user} đang phát nhạc cho {member.name}")
+
+                except Exception as e:
+                    print(f"Lỗi hệ thống phát nhạc: {e}")
+                    if voice_client:
+                        await voice_client.disconnect()
+
+async def main():
+    bot_duyanh = BodyguardBot(vip_id=469547032688984075, music_file="Anh DUy Anh.mp3")
+    bot_kienphat = BodyguardBot(vip_id=1047924907805253692, music_file="anhkiemphat.mp3")
+    bot_huyly = BodyguardBot(vip_id=916156563931168808, music_file="emhuylys.mp3")
+    bot_giabao = BodyguardBot(vip_id=508480474381942794, music_file="anhgiabao.mp3")
+    await asyncio.gather(
+        bot_duyanh.start(os.environ.get("BOT_DUYANH", "")),
+        bot_kienphat.start(os.environ.get("BOT_KIENPHAT", "")),
+        bot_huyly.start(os.environ.get("BOT_HUY", ""))
+        bot_gibao.start(os.environ.get("BOT_GIABAO", ""))
+    )
+    )
+
+# Khởi động Web Server ảo
 keep_alive()
 
-if TOKEN:
-    bot.run(TOKEN)
-else:
-    print("LỖI: Chưa cấu hình DISCORD_TOKEN trên Render!")
-
+# Kích hoạt Event Loop chính của Python
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Đã tắt toàn bộ hệ thống Bot.")
