@@ -17,9 +17,9 @@ FFMPEG_OPTIONS = {
 }
 
 USER_MUSIC = {
-    1047924907805253692: "anhkiemphat.mp3",   # ID của bạn
-    222222222222222222: "nhac_cua_chau.mp3",  # ID của Châu
-    333333333333333333: "nhac_cua_thai.mp3",  # ID của Thái
+    1047924907805253692: "anhkiemphat.mp3",   
+    916156563931168808: "emhuylys.mp3",  
+    508480474381942794: "nhacgiabao.mp3",  
 }
 
 DEFAULT_MUSIC = "Anh DUy Anh (mp3cut.net).mp3"
@@ -83,3 +83,4 @@ if TOKEN:
     bot.run(TOKEN)
 else:
     print("LỖI: Chưa cấu hình DISCORD_TOKEN trên Render!")
+
