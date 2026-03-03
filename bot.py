@@ -81,7 +81,7 @@ async def main():
     await asyncio.gather(
         bot_duyanh.start(os.environ.get("BOT_DUYANH", "")),
         bot_kienphat.start(os.environ.get("BOT_KIENPHAT", "")),
-        bot_huyly.start(os.environ.get("BOT_HUY", ""))
+        bot_huyly.start(os.environ.get("BOT_HUY", "")),
         bot_gibao.start(os.environ.get("BOT_GIABAO", ""))
     )
     )
@@ -95,3 +95,4 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Đã tắt toàn bộ hệ thống Bot.")
+
