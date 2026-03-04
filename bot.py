@@ -74,7 +74,7 @@ class BodyguardBot(discord.Client):
                         await voice_client.disconnect()
 
 async def main():
-    bot_duyanh = BodyguardBot(vip_id=469547032688984075, music_file="Anh DUy Anh.mp3")
+    bot_duyanh = BodyguardBot(vip_id=469547032688984075, music_file="Anh DUy Anh (mp3cut.net).mp3")
     bot_kienphat = BodyguardBot(vip_id=1047924907805253692, music_file="anhkiemphat.mp3")
     bot_huyly = BodyguardBot(vip_id=916156563931168808, music_file="emhuylys.mp3")
     bot_giabao = BodyguardBot(vip_id=508480474381942794, music_file="anhgiabao.mp3")
@@ -95,5 +95,6 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Đã tắt toàn bộ hệ thống Bot.")
+
 
 
