@@ -80,6 +80,7 @@ async def main():
     bot_giabao = BodyguardBot(vip_id=508480474381942794, music_file="anhgiabao.mp3")
     bot_dung = BodyguardBot(vip_id=843320963298623568, music_file="anhtrandung.mp3")
     bot_kienphat2 = BodyguardBot(vip_id=1231976395605807146, music_file="da.mp3")
+    bot_ha = BodyguardBot(vip_id=1482033286027935796, music_file="ha.mp3")
     
     await asyncio.gather(
         bot_duyanh.start(os.environ.get("BOT_DUYANH", "")),
@@ -87,6 +88,7 @@ async def main():
         bot_huyly.start(os.environ.get("BOT_HUY", "")),
         bot_giabao.start(os.environ.get("BOT_GIABAO", "")),
         bot_kienphat2.start(os.environ.get("BOT_DUYANH", "")),
+        bot_ha.start(os.environ.get("BOT_HA", "")),
         bot_dung.start(os.environ.get("BOT_DUNG", ""))
     )
 
