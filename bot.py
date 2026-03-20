@@ -120,7 +120,7 @@ async def main():
     tasks = [
         asyncio.create_task(safe_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), "BOT_DUYANH", 0)),
         asyncio.create_task(safe_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT", 30)),
-        asyncio.create_task(safe_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY", 60)),
+        asyncio.create_task(safe_start(bot_huyly, os.environ.get("BOT_HUYLY", ""), "BOT_HUYLY", 60)),
         asyncio.create_task(safe_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO", 90)),
         asyncio.create_task(safe_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA", 120)),
         asyncio.create_task(safe_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG", 150)),
