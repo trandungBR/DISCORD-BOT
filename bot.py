@@ -53,18 +53,17 @@ class BodyguardBot(discord.Client):
 
                 voice_client = discord.utils.get(self.voice_clients, guild=after.channel.guild)
 
-try:
-    if voice_client:
-        if voice_client.channel != after.channel:
-            await voice_client.move_to(after.channel)
-    else:
-        voice_client = await after.channel.connect()
-        print(f"[KẾT NỐI] {self.user} đã vào phòng voice thành công!")
-
-except Exception as e:
-    print(f"[LỖI VOICE] {self.user} không vào được phòng: {e}")
-    return
-
+                try:
+                    if voice_client:
+                        if voice_client.channel != after.channel:
+                            await voice_client.move_to(after.channel)
+                    else:
+                        voice_client = await after.channel.connect()
+                        print(f"[KẾT NỐI] {self.user} đã vào phòng voice thành công!")
+                
+                except Exception as e:
+                    print(f"[LỖI VOICE] {self.user} không vào được phòng: {e}")
+                    return
                 try:
                     raw_source = discord.FFmpegPCMAudio(selected_music, executable="ffmpeg", **FFMPEG_OPTIONS)
                     vol_source = discord.PCMVolumeTransformer(raw_source, volume=0.74)
