@@ -53,16 +53,17 @@ class BodyguardBot(discord.Client):
 
                 voice_client = discord.utils.get(self.voice_clients, guild=after.channel.guild)
 
-                if voice_client and voice_client.is_connected():
-                    if voice_client.is_playing():
-                        return
-                else:
-                    try:
-                        voice_client = await after.channel.connect()
-                        print(f"[KẾT NỐI] {self.user} đã vào phòng voice thành công!")
-                    except Exception as e:
-                        print(f"[LỖI VOICE] {self.user} không vào được phòng: {e}")
-                        return
+try:
+    if voice_client:
+        if voice_client.channel != after.channel:
+            await voice_client.move_to(after.channel)
+    else:
+        voice_client = await after.channel.connect()
+        print(f"[KẾT NỐI] {self.user} đã vào phòng voice thành công!")
+
+except Exception as e:
+    print(f"[LỖI VOICE] {self.user} không vào được phòng: {e}")
+    return
 
                 try:
                     raw_source = discord.FFmpegPCMAudio(selected_music, executable="ffmpeg", **FFMPEG_OPTIONS)
@@ -87,44 +88,46 @@ class BodyguardBot(discord.Client):
 
 # Cập nhật hàm safe_start để bot biết "xếp hàng" chờ tới lượt
 async def safe_start(bot, token, name, start_delay):
+
     if not token:
-        print(f"[CẢNH BÁO] Biến môi trường {name} đang trống! Bỏ qua bot này.")
+        print(f"[CẢNH BÁO] {name} không có token")
         return
-    
-    # Nghỉ một khoảng thời gian trước khi đăng nhập để tránh bị Discord block IP
-    if start_delay > 0:
-        print(f"[CHỜ ĐĂNG NHẬP] Bot {name} đang chờ {start_delay} giây...")
-        await asyncio.sleep(start_delay)
-        
-    try:
-        await bot.start(token)
-    except Exception as e:
-        print(f"[CRASH TỪNG PHẦN] Bot {name} chết ngỏm vì lỗi: {e}")
 
+    await asyncio.sleep(start_delay)
+
+    while True:
+        try:
+            print(f"[LOGIN] {name}")
+            await bot.start(token)
+
+        except Exception as e:
+            print(f"[CRASH] {name}: {e}")
+            print(f"[RETRY] {name} thử lại sau 60s")
+            await asyncio.sleep(60)
 async def main():
-    # --- CẤU HÌNH BOT DUY ANH SIÊU CẤP ---
-    config_duyanh = {
-        469547032688984075: "da.mp3",                           
-        1231976395605807146: ["da.mp3", "da(1).mp3"]            
-    }
-    bot_duyanh = BodyguardBot(vip_config=config_duyanh)
 
-    # --- CẤU HÌNH CÁC BOT CÒN LẠI ---
+    config_duyanh = {
+        469547032688984075: "da.mp3",
+        1231976395605807146: ["da.mp3", "da(1).mp3"]
+    }
+
+    bot_duyanh = BodyguardBot(vip_config=config_duyanh)
     bot_kienphat = BodyguardBot(vip_config={1047924907805253692: "anhkiemphat.mp3"})
     bot_huyly = BodyguardBot(vip_config={916156563931168808: "emhuyly.mp3"})
     bot_giabao = BodyguardBot(vip_config={508480474381942794: "anhgiabao.mp3"})
     bot_ha = BodyguardBot(vip_config={1482033286027935796: "ha.mp3", 952619435095629896: "ha.mp3"})
     bot_dung = BodyguardBot(vip_config={843320963298623568: "anhtrandung.mp3"})
-    
-    # KÍCH HOẠT BOT VỚI THỜI GIAN GIÃN CÁCH (Mỗi con cách nhau 5 giây)
-    await asyncio.gather(
-        safe_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), "BOT_DUYANH", 0),
-        safe_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT", 5),
-        safe_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY", 10),
-        safe_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO", 15),
-        safe_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA", 20),
-        safe_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG", 25)
-    )
+
+    tasks = [
+        asyncio.create_task(safe_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), "BOT_DUYANH", 0)),
+        asyncio.create_task(safe_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT", 30)),
+        asyncio.create_task(safe_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY", 60)),
+        asyncio.create_task(safe_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO", 90)),
+        asyncio.create_task(safe_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA", 120)),
+        asyncio.create_task(safe_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG", 150)),
+    ]
+
+    await asyncio.gather(*tasks)
 keep_alive()
 
 if __name__ == "__main__":
