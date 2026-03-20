@@ -103,7 +103,7 @@ async def main():
         delayed_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT", 60),
         delayed_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY", 120),
         delayed_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO", 180),
-        delayed_start(bot_kienphat2, os.environ.get("BOT_KIENPHAT2", ""), "BOT_KIENPHAT2", 240), 
+        delayed_start(bot_kienphat2, os.environ.get("BOT_KIENPHAT2", ""), "BOT_DUYANH", 240), 
         delayed_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA", 300),
         delayed_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG", 360)
     )
