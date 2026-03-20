@@ -72,15 +72,20 @@ class BodyguardBot(discord.Client):
 # ==========================================
 # HÀM BẮT BOT XẾP HÀNG ĐỂ NÉ LỖI CLOUDFLARE
 # ==========================================
-async def delayed_start(bot, token, delay_seconds):
+async def delayed_start(bot, token, name, delay_seconds):
     if not token:
-        print("Thiếu token, bỏ qua bot này.")
+        print(f"[BỎ QUA] {name} thiếu token đăng nhập.")
         return
+    
     if delay_seconds > 0:
-        print(f"Đang chờ {delay_seconds} giây để cho bot tiếp theo lên sóng...")
+        print(f"[XẾP HÀNG] {name} đang chờ {delay_seconds} giây tới lượt...")
         await asyncio.sleep(delay_seconds)
     
-    await bot.start(token)
+    print(f"[ĐANG VÀO] {name} bắt đầu xuất kích!")
+    try:
+        await bot.start(token)
+    except Exception as e:
+        print(f"[CRASH TỪNG PHẦN] Á đù, {name} bị văng mạng rồi! Lỗi: {e}")
 
 async def main():
     bot_duyanh = BodyguardBot(vip_ids=469547032688984075, music_file="da.mp3")
@@ -92,18 +97,15 @@ async def main():
     bot_kienphat2 = BodyguardBot(vip_ids=1231976395605807146, music_file=["da.mp3", "da(1).mp3"])
     bot_ha = BodyguardBot(vip_ids=(1482033286027935796, 952619435095629896), music_file="ha.mp3")
     
-    # Khởi chạy đa luồng các bot, cách nhau 60 giây (1 phút)
+    # Kèm thêm tên gọi để dễ bắt bệnh
     await asyncio.gather(
-        delayed_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), 0),
-        delayed_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), 60),
-        delayed_start(bot_huyly, os.environ.get("BOT_HUY", ""), 120),
-        delayed_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), 180),
-        
-        # CHÚ Ý: Chỗ này bạn đang xài chung token BOT_DUYANH, cẩn thận bot tự đá nhau!
-        delayed_start(bot_kienphat2, os.environ.get("BOT_DUYANH", ""), 240), 
-        
-        delayed_start(bot_ha, os.environ.get("BOT_HA", ""), 300),
-        delayed_start(bot_dung, os.environ.get("BOT_DUNG", ""), 360)
+        delayed_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), "BOT_DUYANH", 0),
+        delayed_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT", 60),
+        delayed_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY", 120),
+        delayed_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO", 180),
+        delayed_start(bot_kienphat2, os.environ.get("BOT_KIENPHAT2", ""), "BOT_KIENPHAT2", 240), 
+        delayed_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA", 300),
+        delayed_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG", 360)
     )
 
 # Khởi động Web Server ảo
