@@ -1,6 +1,7 @@
 import discord
 import asyncio
 import os
+import random  # Thêm thư viện random
 from keep_alive import keep_alive
 
 # Bật Intents
@@ -10,22 +11,23 @@ intents.voice_states = True
 FFMPEG_OPTIONS = {'options': '-vn'}
 
 class BodyguardBot(discord.Client):
+    # Cập nhật để music_file có thể nhận 1 file hoặc 1 list các file
     def __init__(self, vip_ids, music_file):
         super().__init__(intents=intents)
         self.vip_ids = [vip_ids] if isinstance(vip_ids, int) else vip_ids
-        self.music_file = music_file
+        # Nếu truyền vào chuỗi (1 bài) thì chuyển thành list 1 phần tử, nếu truyền list thì giữ nguyên
+        self.music_files = [music_file] if isinstance(music_file, str) else music_file
         self.bot_loop = None 
 
     async def on_ready(self):
         self.bot_loop = asyncio.get_running_loop()
-        print(f"[ONLINE] Vệ sĩ {self.user} đã lên sóng! Nhạc: {self.music_file} | Phục vụ VIP: {self.vip_ids}")
+        print(f"[ONLINE] Vệ sĩ {self.user} đã lên sóng! Nhạc chuẩn bị: {self.music_files} | Phục vụ VIP: {self.vip_ids}")
 
     async def on_voice_state_update(self, member, before, after):
         if member == self.user:
             return
 
         # Bật log này lên để xem có ai ra/vào bất kỳ phòng nào không
-        # Nếu dòng này không hiện, nghĩa là Bot chưa được cấp quyền đọc Voice Channel trong Developer Portal
         if after.channel is not None and before.channel != after.channel:
             print(f"[DEBUG] {member.name} vừa nhảy vào phòng: {after.channel.name}")
 
@@ -37,7 +39,10 @@ class BodyguardBot(discord.Client):
                     print(f"[BỎ QUA] {member.name} vào LOBBY nhưng không phải VIP của bot {self.user}")
                     return 
                 
-                print(f"[VIP IN] Chủ tướng {member.name} giá lâm! {self.user} chuẩn bị lên nhạc '{self.music_file}'...")
+                # Bốc thăm ngẫu nhiên 1 bài hát trong danh sách nhạc của VIP này
+                selected_music = random.choice(self.music_files)
+                
+                print(f"[VIP IN] Chủ tướng {member.name} giá lâm! {self.user} bốc trúng bài '{selected_music}'...")
 
                 voice_client = discord.utils.get(self.voice_clients, guild=after.channel.guild)
 
@@ -53,7 +58,8 @@ class BodyguardBot(discord.Client):
                         return
 
                 try:
-                    raw_source = discord.FFmpegPCMAudio(self.music_file, executable="ffmpeg", **FFMPEG_OPTIONS)
+                    # Phát bài nhạc vừa được random
+                    raw_source = discord.FFmpegPCMAudio(selected_music, executable="ffmpeg", **FFMPEG_OPTIONS)
                     vol_source = discord.PCMVolumeTransformer(raw_source, volume=0.74)
 
                     def after_playing(error):
@@ -66,7 +72,7 @@ class BodyguardBot(discord.Client):
 
                     if not voice_client.is_playing():
                         voice_client.play(vol_source, after=after_playing)
-                        print(f"[PLAYING] Đang xập xình bài {self.music_file} cho sếp {member.name}")
+                        print(f"[PLAYING] Đang xập xình bài {selected_music} cho sếp {member.name}")
 
                 except Exception as e:
                     print(f"[LỖI NHẠC] Không thể phát nhạc: {e}")
@@ -84,11 +90,15 @@ async def safe_start(bot, token, name):
         print(f"[CRASH TỪNG PHẦN] Bot {name} chết ngỏm vì lỗi: {e}")
 
 async def main():
+    # Duy Anh chỉ nhận đúng 1 bài da.mp3
     bot_duyanh = BodyguardBot(vip_ids=469547032688984075, music_file="da.mp3")
     bot_kienphat = BodyguardBot(vip_ids=1047924907805253692, music_file="anhkiemphat.mp3")
     bot_huyly = BodyguardBot(vip_ids=916156563931168808, music_file="emhuyly.mp3")
     bot_giabao = BodyguardBot(vip_ids=508480474381942794, music_file="anhgiabao.mp3")
-    bot_kienphat2 = BodyguardBot(vip_ids=1231976395605807146, music_file="da.mp3")
+    
+    # Kiến Phát 2 được cấp danh sách 2 bài hát, bot sẽ tự random mỗi khi sếp vào
+    bot_kienphat2 = BodyguardBot(vip_ids=1231976395605807146, music_file=["da.mp3", "da(1).mp3"])
+    
     bot_ha = BodyguardBot(vip_ids=(1482033286027935796, 952619435095629896), music_file="ha.mp3")
     bot_dung = BodyguardBot(vip_ids=843320963298623568, music_file="anhtrandung.mp3")
     
