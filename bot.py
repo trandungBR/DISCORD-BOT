@@ -85,10 +85,17 @@ class BodyguardBot(discord.Client):
                     if voice_client:
                         await voice_client.disconnect()
 
-async def safe_start(bot, token, name):
+# Cập nhật hàm safe_start để bot biết "xếp hàng" chờ tới lượt
+async def safe_start(bot, token, name, start_delay):
     if not token:
         print(f"[CẢNH BÁO] Biến môi trường {name} đang trống! Bỏ qua bot này.")
         return
+    
+    # Nghỉ một khoảng thời gian trước khi đăng nhập để tránh bị Discord block IP
+    if start_delay > 0:
+        print(f"[CHỜ ĐĂNG NHẬP] Bot {name} đang chờ {start_delay} giây...")
+        await asyncio.sleep(start_delay)
+        
     try:
         await bot.start(token)
     except Exception as e:
@@ -96,10 +103,9 @@ async def safe_start(bot, token, name):
 
 async def main():
     # --- CẤU HÌNH BOT DUY ANH SIÊU CẤP ---
-    # Phục vụ 2 sếp với rule khác nhau
     config_duyanh = {
-        469547032688984075: "da.mp3",                           # Duy Anh: Fix cứng 1 bài
-        1231976395605807146: ["da.mp3", "da(1).mp3"]            # Kiến Phát 2: Random 1 trong 2 bài
+        469547032688984075: "da.mp3",                           
+        1231976395605807146: ["da.mp3", "da(1).mp3"]            
     }
     bot_duyanh = BodyguardBot(vip_config=config_duyanh)
 
@@ -107,24 +113,18 @@ async def main():
     bot_kienphat = BodyguardBot(vip_config={1047924907805253692: "anhkiemphat.mp3"})
     bot_huyly = BodyguardBot(vip_config={916156563931168808: "emhuyly.mp3"})
     bot_giabao = BodyguardBot(vip_config={508480474381942794: "anhgiabao.mp3"})
-    
-    # Hà có 2 acc, dùng chung 1 bài
-    bot_ha = BodyguardBot(vip_config={
-        1482033286027935796: "ha.mp3", 
-        952619435095629896: "ha.mp3"
-    })
-    
+    bot_ha = BodyguardBot(vip_config={1482033286027935796: "ha.mp3", 952619435095629896: "ha.mp3"})
     bot_dung = BodyguardBot(vip_config={843320963298623568: "anhtrandung.mp3"})
     
+    # KÍCH HOẠT BOT VỚI THỜI GIAN GIÃN CÁCH (Mỗi con cách nhau 5 giây)
     await asyncio.gather(
-        safe_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), "BOT_DUYANH"),
-        safe_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT"),
-        safe_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY"),
-        safe_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO"),
-        safe_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA"),
-        safe_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG")
+        safe_start(bot_duyanh, os.environ.get("BOT_DUYANH", ""), "BOT_DUYANH", 0),
+        safe_start(bot_kienphat, os.environ.get("BOT_KIENPHAT", ""), "BOT_KIENPHAT", 5),
+        safe_start(bot_huyly, os.environ.get("BOT_HUY", ""), "BOT_HUYLY", 10),
+        safe_start(bot_giabao, os.environ.get("BOT_GIABAO", ""), "BOT_GIABAO", 15),
+        safe_start(bot_ha, os.environ.get("BOT_HA", ""), "BOT_HA", 20),
+        safe_start(bot_dung, os.environ.get("BOT_DUNG", ""), "BOT_DUNG", 25)
     )
-
 keep_alive()
 
 if __name__ == "__main__":
