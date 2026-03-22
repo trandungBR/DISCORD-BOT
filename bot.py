@@ -61,7 +61,7 @@ class BodyguardBot(discord.Client):
                 try:
                     # <-- SỬA: Chạy bài nhạc vừa bốc được
                     raw_source = discord.FFmpegPCMAudio(current_music, executable="ffmpeg", **FFMPEG_OPTIONS)
-                    vol_source = discord.PCMVolumeTransformer(raw_source, volume=0.74)
+                    vol_source = discord.PCMVolumeTransformer(raw_source, volume=0.36)
 
                     def after_playing(error):
                         if error:
