@@ -87,7 +87,7 @@ async def main():
     bot_huyly = BodyguardBot(vip_ids=916156563931168808, music_file="emhuyly.mp3")
     bot_giabao = BodyguardBot(vip_ids=508480474381942794, music_file="anhgiabao.mp3")
     bot_dung = BodyguardBot(vip_ids=843320963298623568, music_file="anhtrandung.mp3")
-    
+    bot_tl = BodyguardBot(vip_ids=1413917349102489771, music_file="tl.mp3")
     # <-- SỬA: Truyền hẳn 1 list 2 bài cho kienphat2 để nó random
     bot_kienphat2 = BodyguardBot(vip_ids=1231976395605807146, music_file=["da.mp3", "da(1).mp3"])
     
@@ -102,6 +102,7 @@ async def main():
         bot_giabao.start(os.environ.get("BOT_GIABAO", "")),
         bot_kienphat2.start(os.environ.get("BOT_DUYANH", "")), 
         bot_ha.start(os.environ.get("BOT_HA", "")),
+        bot_tl.start(os.environ.get("BOT_TL", "")),
         bot_dung.start(os.environ.get("BOT_DUNG", ""))
     )
 
